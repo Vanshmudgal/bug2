@@ -1,1 +1,20 @@
 @import "tailwindcss";
+
+
+/* Apply dark theme to the entire app */
+@layer base {
+  html, body, #root {
+    @apply h-full bg-gray-950 text-gray-200; /* Full height + dark bg + light text */
+  }
+  
+  /* Optional: Better scrollbar styling */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-800;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-600 rounded-full hover:bg-gray-500;
+  }
+}
