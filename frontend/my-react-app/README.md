@@ -1,32 +1,67 @@
-## Bug Creation App
+# 🐞 Bug Creation App
 
-A simple bug tracking and management system built with React, Tailwind CSS, and Firebase Firestore.
+A simple and efficient bug tracking and management system built using React, Tailwind CSS, and Firebase Firestore.
 
-### 🚀 Tech Stack
-- **Frontend:** React + Vite
-- **Styling:** Tailwind CSS
-- **Backend/Database:** Firebase (Firestore)
+---
 
-### ✨ Features
-- Developer can create, edit, and delete bugs
-- Developers can request bug closure
-- Manager can approve and close bugs
-- Authentication system implemented
-- Timestamps show when a bug was created
+## 🚀 Tech Stack
 
-### 📁 Folder Structure
-All source code is located inside:
+- **Frontend:** React + Vite  
+- **Styling:** Tailwind CSS  
+- **Backend / Database:** Firebase (Firestore)
 
-Username: developer  
-Password: dev123
+---
 
-Can create, edit, and delete bugs
+## ✨ Features
 
-Can request closure for a bug
+- 🐛 Developers can create, edit, and delete bugs  
+- 📩 Developers can request bug closure  
+- ✅ Managers can approve or reject bug closure requests  
+- 🔐 User authentication is implemented  
+- ⏱️ Each bug includes a creation timestamp  
 
-Username: manager  
-Password: manager123
+---
 
-Can view all bugs
+## 📁 Folder Structure
 
-Can approve or reject closure requests
+All source code resides inside the `my-react-app` directory:
+
+
+---
+
+## 👥 Demo Credentials
+
+Use the following sample accounts to test the application:
+
+### 👨‍💻 Developer Account
+
+- **Username:** `developer`  
+- **Password:** `dev123`  
+
+**Permissions:**
+- Create, edit, and delete bugs  
+- Request closure of bugs  
+
+### 👩‍💼 Manager Account
+
+- **Username:** `manager`  
+- **Password:** `manager123`  
+
+**Permissions:**
+- View all submitted bugs  
+- Approve or reject bug closure requests  
+
+---
+
+## 🔧Getting Started
+
+1. **Clone the repository:**
+
+```bash
+git clone https://github.com/Vanshmudgal/bug2
+cd your-repo-name
+
+npm install
+npm run dev
+
+
