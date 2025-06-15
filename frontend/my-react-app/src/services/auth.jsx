@@ -2,15 +2,15 @@
 const users = [
   {
     id: 1,
-    username: 'developer',
-    password: 'dev123',
+    username: import.meta.env.VITE_DEV_USERNAME,
+    password: import.meta.env.VITE_DEV_PASSWORD,
     role: 'developer',
     name: 'John Developer'
   },
   {
     id: 2,
-    username: 'manager',
-    password: 'manager123',
+    username: import.meta.env.VITE_MANAGER_USERNAME,
+    password: import.meta.env.VITE_MANAGER_PASSWORD,
     role: 'manager',
     name: 'Jane Manager'
   }
