@@ -1,20 +1,26 @@
 // src/services/firebase.js
+
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
+// 🔐 Replace these placeholder values with your own Firebase project config
 const firebaseConfig = {
-  apiKey: "AIzaSyCxgI6yma9_GsxU5uD0ieQbrkFkoY4N21I",
-  authDomain: "bugg-d7abc.firebaseapp.com",
-  projectId: "bugg-d7abc",
-  storageBucket: "bugg-d7abc.appspot.com",
-  messagingSenderId: "172353356229",
-  appId: "1:172353356229:web:324ce5c9a2a73525b98bac",
-  measurementId: "G-HBN26DL5Y3"
+  apiKey: "YOUR_API_KEY_HERE",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID",
+  measurementId: "YOUR_MEASUREMENT_ID" // (Optional, only needed if using analytics)
 };
-// Initialize Firebase
+
+// ✅ Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// 🔥 Initialize Firestore and Auth
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-export { db, auth };  // Make sure to export both db and auth
+// 📦 Export Firestore and Auth for use in other parts of the app
+export { db, auth };
