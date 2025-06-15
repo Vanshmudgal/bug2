@@ -59,7 +59,8 @@ Use the following sample accounts to test the application:
 
 ```bash
 git clone https://github.com/Vanshmudgal/bug2
-cd your-repo-name
+cd frontend
+cd my-react-app
 
 npm install
 npm run dev
