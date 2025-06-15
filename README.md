@@ -55,13 +55,15 @@ Use the following sample accounts to test the application:
 
 ## 🔧Getting Started
 
-1. **Clone the repository:**
+1.  **Clone the repository:**
+  git clone https://github.com/Vanshmudgal/bug2
 
-```bash
-git clone https://github.com/Vanshmudgal/bug2
-cd frontend
-cd my-react-app
+2. Set up Firebase:
+   Add your Firebase credentials in src/firebase.js (replace the existing config with your own)
+   
+3.cd frontend
+4. cd my-react-app
 
-npm install
-npm run dev
+5. npm install
+6. npm run dev
 
