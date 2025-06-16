@@ -6,6 +6,10 @@ import {
   doc, updateDoc, deleteDoc, serverTimestamp, getDoc
 } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
+import BugForm from './components/BugForm';
+import BugList from './components/BugList';
+import BugFilters from './components/BugFilters';
+import EditBugModal from './components/EditBugModal';
 
 const Dashboard = () => {
   const user = getCurrentUser();
@@ -35,12 +39,10 @@ const Dashboard = () => {
     direction: 'desc'
   });
 
-  // Fetch data on component mount
   useEffect(() => {
     fetchBugs();
   }, []);
 
-  // Apply filters when bugs or filters change
   useEffect(() => {
     applyFiltersAndSort();
   }, [bugs, filters, sortConfig]);
@@ -272,69 +274,6 @@ const Dashboard = () => {
     }
   };
 
-  const calculateTimeElapsed = (bug) => {
-   if (!bug.createdAt) return 0;
-  
-  const now = new Date();
-  const createdAt = bug.createdAt.toDate();
-  let elapsedSeconds = Math.floor((now - createdAt) / 1000);
-  
-  // If timer is running, add the active time
-  if (bug.timerStart) {
-    const timerStart = bug.timerStart.toDate();
-    elapsedSeconds += Math.floor((now - timerStart) / 1000);
-  }
-  
-  return elapsedSeconds;
-  };
-
-  const formatTime = (seconds) => {
-    if (!seconds) return '00:00:00';
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return [
-      hours.toString().padStart(2, '0'),
-      minutes.toString().padStart(2, '0'),
-      secs.toString().padStart(2, '0')
-    ].join(':');
-  };
-
-  const getStatusColor = (status) => {
-    switch(status) {
-      case 'open': return 'bg-emerald-900/20 text-emerald-400';
-      case 'in-progress': return 'bg-amber-900/20 text-amber-400';
-      case 'pending-approval': return 'bg-blue-900/20 text-blue-400';
-      case 'closed': return 'bg-gray-800/50 text-gray-400';
-      default: return '';
-    }
-  };
-
-  const getPriorityColor = (priority) => {
-    switch(priority) {
-      case 'low': return 'text-gray-400';
-      case 'medium': return 'text-blue-400';
-      case 'high': return 'text-amber-400';
-      case 'critical': return 'text-red-400';
-      default: return '';
-    }
-  };
-
-  const renderTimeTracking = (bug) => {
-    const elapsedTime = calculateTimeElapsed(bug);
-    
-    return (
-      <div className="flex flex-col">
-        <div className="text-sm font-medium">
-          {formatTime(elapsedTime)}
-          {bug.status === 'in-progress' && (
-            <span className="ml-2 text-xs text-emerald-400">(Active)</span>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-gray-950 text-gray-200 p-6">
       <div className="max-w-7xl mx-auto">
@@ -353,380 +292,40 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Filters Section */}
-        <div className="bg-gray-900 rounded-lg p-4 mb-6 border border-gray-800">
-          <h2 className="text-lg font-medium text-gray-300 mb-3">Filters</h2>
-          <div className="flex flex-wrap gap-4">
-            <select
-              name="status"
-              value={filters.status}
-              onChange={handleFilterChange}
-              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">All Statuses</option>
-              <option value="open">Open</option>
-              <option value="in-progress">In Progress</option>
-              <option value="pending-approval">Pending Approval</option>
-              <option value="closed">Closed</option>
-            </select>
-            
-            <select
-              name="priority"
-              value={filters.priority}
-              onChange={handleFilterChange}
-              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">All Priorities</option>
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
-            
-            <select
-              name="project"
-              value={filters.project}
-              onChange={handleFilterChange}
-              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">All Projects</option>
-              {projects.map(project => (
-                <option key={project} value={project}>{project}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+        <BugFilters 
+          filters={filters} 
+          projects={projects} 
+          handleFilterChange={handleFilterChange} 
+        />
 
-        {/* Bug Creation Form (for developers) */}
         {user.role === 'developer' && (
-          <div className="bg-gray-900 rounded-lg p-6 mb-6 border border-gray-800">
-            <h2 className="text-lg font-medium text-gray-300 mb-4">Create New Bug</h2>
-            <form onSubmit={handleAddBug} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Title*</label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={newBug.title}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Project*</label>
-                  <select
-                    name="project"
-                    value={newBug.project}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select Project</option>
-                    {projects.map(project => (
-                      <option key={project} value={project}>{project}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Description*</label>
-                <textarea
-                  name="description"
-                  value={newBug.description}
-                  onChange={handleInputChange}
-                  required
-                  rows={4}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Priority*</label>
-                  <select
-                    name="priority"
-                    value={newBug.priority}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="critical">Critical</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Status*</label>
-                  <select
-                    name="status"
-                    value={newBug.status}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="open">Open</option>
-                    <option value="in-progress">In Progress</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Assignee</label>
-                  <select
-                    name="assignee"
-                    value={newBug.assignee}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Unassigned</option>
-                    {teamMembers.map(member => (
-                      <option key={member} value={member}>{member}</option>
-                    ))}
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Due Date</label>
-                  <input
-                    type="date"
-                    name="dueDate"
-                    value={newBug.dueDate}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Labels</label>
-                <div className="flex flex-wrap gap-2">
-                  {['bug', 'feature', 'ui', 'backend', 'urgent'].map(label => (
-                    <button
-                      key={label}
-                      type="button"
-                      onClick={() => handleLabelToggle(label)}
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        newBug.labels.includes(label) 
-                          ? 'bg-blue-900/50 text-blue-400 border border-blue-800' 
-                          : 'bg-gray-800/50 text-gray-400 border border-gray-700'
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <button 
-                type="submit" 
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 text-sm font-medium transition-colors"
-              >
-                Create Bug
-              </button>
-            </form>
-          </div>
+          <BugForm 
+            newBug={newBug} 
+            projects={projects} 
+            teamMembers={teamMembers} 
+            handleInputChange={handleInputChange} 
+            handleLabelToggle={handleLabelToggle} 
+            handleAddBug={handleAddBug} 
+          />
         )}
 
-        {/* Bugs List */}
-        <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800">
-          <div className="px-6 py-4 border-b border-gray-800">
-            <h2 className="text-lg font-medium text-gray-300">
-              {user.role === 'developer' ? 'Your Bugs' : 'All Bugs'}
-            </h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-800">
-              <thead className="bg-gray-800">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Title</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Project</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Priority</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Assignee</th>
-                  {user.role === 'manager' && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Created By</th>
-                  )}
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Time Spent</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-gray-900 divide-y divide-gray-800">
-                {filteredBugs
-                  .filter(bug => user.role === 'manager' || bug.createdBy === user.name || bug.assignee === user.name)
-                  .map(bug => (
-                    <tr key={bug.id} className="hover:bg-gray-800/50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">{bug.title}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{bug.project}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(bug.status)}`}>
-                          {bug.status}
-                        </span>
-                      </td>
-                      <td className={`px-6 py-4 whitespace-nowrap text-sm capitalize ${getPriorityColor(bug.priority)}`}>
-                        {bug.priority}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{bug.assignee || 'Unassigned'}</td>
-                      {user.role === 'manager' && (
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{bug.createdBy}</td>
-                      )}
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                        {renderTimeTracking(bug)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 space-x-2">
-                        {user.role === 'developer' && (
-                          <>
-                            <button
-                              onClick={() => setEditingBug(bug)}
-                              className="text-blue-400 hover:text-blue-300"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDeleteBug(bug.id)}
-                              className="text-red-400 hover:text-red-300"
-                            >
-                              Delete
-                            </button>
-                            {bug.status === 'in-progress' && (
-                              <button
-                                onClick={() => handleCloseBug(bug.id)}
-                                className="text-amber-400 hover:text-amber-300"
-                              >
-                                End Task
-                              </button>
-                            )}
-                          </>
-                        )}
-                        {user.role === 'manager' && bug.status === 'pending-approval' && (
-                          <>
-                            <button
-                              onClick={() => handleApproveBug(bug.id)}
-                              className="text-emerald-400 hover:text-emerald-300"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => handleReopenBug(bug.id)}
-                              className="text-amber-400 hover:text-amber-300"
-                            >
-                              Reopen
-                            </button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <BugList 
+          filteredBugs={filteredBugs} 
+          user={user} 
+          setEditingBug={setEditingBug}
+          handleDeleteBug={handleDeleteBug}
+          handleCloseBug={handleCloseBug}
+          handleApproveBug={handleApproveBug}
+          handleReopenBug={handleReopenBug}
+        />
       </div>
 
-      {/* Edit Bug Modal */}
-      {editingBug && (
-        <div className="fixed inset-0 bg-gray-950/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-gray-900 rounded-lg shadow-xl max-w-2xl w-full p-6 border border-gray-800">
-            <h2 className="text-lg font-medium text-gray-300 mb-4">Edit Bug</h2>
-            <form className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Title*</label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={editingBug.title}
-                    onChange={(e) => setEditingBug({...editingBug, title: e.target.value})}
-                    required
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Project*</label>
-                  <select
-                    name="project"
-                    value={editingBug.project}
-                    onChange={(e) => setEditingBug({...editingBug, project: e.target.value})}
-                    required
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select Project</option>
-                    {projects.map(project => (
-                      <option key={project} value={project}>{project}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Description*</label>
-                <textarea
-                  name="description"
-                  value={editingBug.description}
-                  onChange={(e) => setEditingBug({...editingBug, description: e.target.value})}
-                  required
-                  rows={4}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Priority*</label>
-                  <select
-                    name="priority"
-                    value={editingBug.priority}
-                    onChange={(e) => setEditingBug({...editingBug, priority: e.target.value})}
-                    required
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="critical">Critical</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Status*</label>
-                  <select
-                    name="status"
-                    value={editingBug.status}
-                    onChange={(e) => setEditingBug({...editingBug, status: e.target.value})}
-                    required
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="open">Open</option>
-                    <option value="in-progress">In Progress</option>
-                    {editingBug.status === 'pending-approval' && (
-                      <option value="pending-approval">Pending Approval</option>
-                    )}
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setEditingBug(null)}
-                  className="px-4 py-2 border border-gray-700 rounded-md shadow-sm text-sm font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleUpdateBug}
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <EditBugModal 
+        editingBug={editingBug} 
+        setEditingBug={setEditingBug} 
+        projects={projects} 
+        handleUpdateBug={handleUpdateBug} 
+      />
     </div>
   );
 };
