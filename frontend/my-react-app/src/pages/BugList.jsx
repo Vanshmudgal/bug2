@@ -1,50 +1,58 @@
 import React from 'react';
+import BugListItem from './BugListItem';
 
-const BugForm = ({ 
-  newBug, 
-  projects, 
-  teamMembers, 
-  handleInputChange, 
-  handleLabelToggle, 
-  handleAddBug 
+const BugList = ({ 
+  filteredBugs, 
+  user, 
+  setEditingBug, 
+  handleDeleteBug, 
+  handleCloseBug, 
+  handleApproveBug, 
+  handleReopenBug 
 }) => {
   return (
-    <div className="bg-gray-900 rounded-lg p-6 mb-6 border border-gray-800">
-      <h2 className="text-lg font-medium text-gray-300 mb-4">Create New Bug</h2>
-      <form onSubmit={handleAddBug} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">Title*</label>
-            <input
-              type="text"
-              name="title"
-              value={newBug.title}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1">Project*</label>
-            <select
-              name="project"
-              value={newBug.project}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Select Project</option>
-              {projects.map(project => (
-                <option key={project} value={project}>{project}</option>
+    <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800">
+      <div className="px-6 py-4 border-b border-gray-800">
+        <h2 className="text-lg font-medium text-gray-300">
+          {user.role === 'developer' ? 'Your Bugs' : 'All Bugs'}
+        </h2>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-800">
+          <thead className="bg-gray-800">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Title</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Project</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Priority</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Assignee</th>
+              {user.role === 'manager' && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Created By</th>
+              )}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Time Spent</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="bg-gray-900 divide-y divide-gray-800">
+            {filteredBugs
+              .filter(bug => user.role === 'manager' || bug.createdBy === user.name || bug.assignee === user.name)
+              .map(bug => (
+                <BugListItem 
+                  key={bug.id} 
+                  bug={bug} 
+                  user={user} 
+                  setEditingBug={setEditingBug}
+                  handleDeleteBug={handleDeleteBug}
+                  handleCloseBug={handleCloseBug}
+                  handleApproveBug={handleApproveBug}
+                  handleReopenBug={handleReopenBug}
+                />
               ))}
-            </select>
-          </div>
-        </div>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
 
-        <div>
-          <label className="block text-sm font-medium text-gray-400 mb-1">Description*</label>
-          <textarea
-            name="description"
-            value={newBug.description}
-            onChange={handleInputChange}
-            required
+export default BugList;
