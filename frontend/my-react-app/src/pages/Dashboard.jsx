@@ -5,11 +5,12 @@ import {
   collection, query, where, getDocs, addDoc,
   doc, updateDoc, deleteDoc, serverTimestamp, getDoc
 } from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
-import BugForm from './components/BugForm';
-import BugList from './components/BugList';
-import BugFilters from './components/BugFilters';
-import EditBugModal from './components/EditBugModal';
+
+
+import BugForm from './BugForm';
+import BugList from './BugList';
+import BugFilters from './BugFilters';
+import EditBugModal from './EditBugModal';
 
 const Dashboard = () => {
   const user = getCurrentUser();
